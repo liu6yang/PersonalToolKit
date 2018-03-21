@@ -107,9 +107,6 @@ namespace common
 
 		static void GenericBuild(string[] scenes, string target, BuildTarget build_target, BuildOptions build_options)
 		{
-		#if !SERVER_BUILD
-			EditorUtils.EmptyEditorLog();
-		#endif
 
 		#if !SERVER_BUILD
 			if (build_target != EditorUserBuildSettings.activeBuildTarget)
@@ -190,6 +187,7 @@ namespace common
             {
                 method.Invoke(null, new object[] { build_target, prjTarget, target });
             }
+
         }
 
 
@@ -467,18 +465,7 @@ namespace common
 				MergeManifest(prjTarget + "/" + Application.productName + "/AndroidManifest.xml.original", prj);
 			}
 
-			Debug.Log("Add build_fixed.xml into build.xml");
-			string lines = File.ReadAllText(prjTarget + "/" + Application.productName + "/build.xml");
-			string fixedLines = File.ReadAllText(EditorEnv.sharedLibrariesLibs + "/build_fixed/build_fixed.xml");
-			int pos = lines.LastIndexOf("</project>");
-			Debug.Assert(pos > 0, "Can't find \"</project>\" in build.xml");
-			lines = lines.Insert(pos, fixedLines);
-			File.WriteAllText(prjTarget + "/" + Application.productName + "/build.xml", lines);
-
-			Debug.Log("Add fixed_dex.py");
-			File.Copy(EditorEnv.sharedLibrariesLibs + "/build_fixed/fixed_dex.py", prjTarget + "/" + Application.productName + "/fixed_dex.py");
-			
-			BuildMultiApkFromEclipsePrj(prjTarget, target);
+            BuildOneApkFromEclipsePrj(prjTarget, target, "");
         }
 
 		static void BuildOneApkFromEclipsePrj(string prjTarget, string target, string chBuildId)
@@ -498,16 +485,16 @@ namespace common
 		#endif
 
             Debug.Log("Sign.");
-            EditorUtils.ExecuteCmd("jarsigner -verbose -digestalg SHA1 -sigalg MD5withRSA -keystore \"" 
-				+ EditorEnv.sharedLibrariesRoot + "/Libs/keystore/android.keystore\"" 
-				+ " -storepass 123456 -signedjar Game-release-unaligned.apk Game-release-unsigned.apk android.keystore", 
-                prjTarget + "/" + Application.productName + "/bin");
+            //EditorUtils.ExecuteCmd("jarsigner -verbose -digestalg SHA1 -sigalg MD5withRSA -keystore \""
+            //    + EditorEnv.sharedLibrariesRoot + "/Libs/keystore/android.keystore\""
+            //    + " -storepass 123456 -signedjar Game-release-unaligned.apk Game-release-unsigned.apk android.keystore",
+            //    prjTarget + "/" + Application.productName + "/bin");
 
             Debug.Log("Zip align.");
 			string sdk = EditorPrefs.GetString("AndroidSdkRoot");
             string[] dirs = Directory.GetDirectories(sdk + "/build-tools");
             string zipalign = dirs[dirs.Length - 1] + "/zipalign";
-            EditorUtils.ExecuteCmd(zipalign + " -f -v 4 Game-release-unaligned.apk Game-release.apk", prjTarget + "/" + Application.productName + "/bin");
+            EditorUtils.ExecuteCmd(zipalign + " -f -v 4 Game-release-unsigned.apk Game-release.apk", prjTarget + "/" + Application.productName + "/bin");
 
             File.Copy(prjTarget + "/" + Application.productName + "/bin/Game-release.apk", 
 			#if SERVER_BUILD

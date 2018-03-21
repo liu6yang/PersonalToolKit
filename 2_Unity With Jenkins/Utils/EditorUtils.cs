@@ -229,25 +229,6 @@ namespace common
 					throw new Exception("cmd has error, " + cmd);
 			}
         }
-
-		[MenuItem("Common/Empty Editor Log", priority = 10)]
-		public static void EmptyEditorLog()
-		{
-			if (Application.platform == RuntimePlatform.WindowsEditor)
-			{
-				// Empty console. This simply does "LogEntries.Clear()" the long way:
-				var logEntries = System.Type.GetType("UnityEditorInternal.LogEntries,UnityEditor.dll");
-				var clearMethod = logEntries.GetMethod("Clear", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-				clearMethod.Invoke(null,null);
-
-				// Empty file.
-				string path = "C:/Users/" + Environment.UserName + "/AppData/Local/Unity/Editor/Editor.log";
-				FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Write);
-				stream.SetLength(0);
-				stream.Close();
-				Debug.Log("Emptied " + path);
-			}
-		}
     }
 
     class EditorUtilsTest
