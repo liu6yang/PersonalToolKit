@@ -4,4 +4,4 @@ ProjectF='/cygdrive/e/github/UntiyWithJenkins/UnityWithJenkins'
 cd $ProjectF
 ProjectPath=`pwd`
 
-"$Unity" -quit -batchmode -projectPath $ProjectPath -executeMethod common.Build.PerformAndroidBuild
+"$Unity" -quit -batchmode -projectPath $ProjectPath -executeMethod common.Build.PerformAndroidBuild -CustomArgs:Build_Dir=$TargetDir

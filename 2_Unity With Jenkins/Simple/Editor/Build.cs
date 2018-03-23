@@ -57,8 +57,17 @@ namespace common
         [MenuItem("CustomBuild/Build Android", priority = 1000)]
         static void PerformAndroidBuild()
         {
-            string target = APP_NAME + ".apk";
-            string dir = "./" + TARGET_DIR + "/Android/" + DateTime.Now.ToString("MM-dd_HH-mm-ss");
+            string target = APP_NAME + "_"+ DateTime.Now.ToString("MM-dd_HH-mm-ss")  + ".apk";
+            string dir = "./" + TARGET_DIR + "/Android/";
+
+            string dir_ = CommandLineReader.GetCustomArgument("Build_Dir");
+            if (!String.IsNullOrEmpty(dir_))
+                dir = dir_;
+            dir = dir.Substring(0, dir.LastIndexOf("/"));
+            Directory.CreateDirectory(dir);
+
+            dir = dir + "/" + DateTime.Now.ToString("MM-dd");
+
             GenericBuild(SCENES, dir + "/" + target, BuildTarget.Android, BuildOptions.None);
         }
 
@@ -81,19 +90,10 @@ namespace common
             }
 			PlayerSettings.bundleVersion = gameVersion;*/
 
-			/*string target_ = CommandLineReader.GetCustomArgument("Build_Target");
-		    if (!String.IsNullOrEmpty(target_))
-			    target = target_;
-            string dir = target.Substring(0, target.LastIndexOf("/"));
-            Directory.CreateDirectory(dir);*/
 
-            string prjTarget = target;
-            if (Directory.Exists(prjTarget))
-                Directory.Delete(prjTarget, true);
+            Debug.Log("Start build " + build_target.ToString() + " with option " + build_options.ToString() + " to " + target);
 
-			Debug.Log("Start build " + build_target.ToString() + " with option " + build_options.ToString() + " to " + prjTarget);
-
-            string res = BuildPipeline.BuildPlayer(scenes, prjTarget, build_target, build_options);
+            string res = BuildPipeline.BuildPlayer(scenes, target, build_target, build_options);
             if (res.Length > 0)
             {
                 throw new Exception("BuildPlayer failure: " + res);
